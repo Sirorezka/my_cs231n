@@ -34,7 +34,9 @@ def rnn_step_forward(x, prev_h, Wx, Wh, b):
     # hidden state and any values you need for the backward pass in the next_h   #
     # and cache variables respectively.                                          #
     ##############################################################################
-    pass
+    h_raw = np.dot(x,Wx)+np.dot(prev_h,Wh)+b.T
+    next_h = np.tanh(h_raw)
+    cache = (h_raw, Wx, Wh, x, prev_h)
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
@@ -63,7 +65,17 @@ def rnn_step_backward(dnext_h, cache):
     # HINT: For the tanh function, you can compute the local derivative in terms #
     # of the output value from tanh.                                             #
     ##############################################################################
-    pass
+    h_raw, Wx, Wh, x, prev_h = cache
+    dh_raw = dnext_h * (1-np.tanh(h_raw)**2)
+    
+    print (dh_raw)
+    
+    db = np.sum(dh_raw,axis=0)
+    dWh = np.dot(prev_h.T,dh_raw)
+    dprev_h = np.dot(dh_raw,Wh.T)
+    dWx = np.dot(x.T,dh_raw)
+    dx = np.dot(dh_raw,Wx.T)
+    print (dh_raw)
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
@@ -94,7 +106,22 @@ def rnn_forward(x, h0, Wx, Wh, b):
     # input data. You should use the rnn_step_forward function that you defined  #
     # above. You can use a for loop to help compute the forward pass.            #
     ##############################################################################
-    pass
+    
+    h = list()
+    cache = list()
+    temp_h = list()
+    temp_cache = list()
+    prev_h = h0
+    for i_seq in range(x.shape[1]):
+        x_i = np.array([t[i_seq] for t in x])
+        h_i, cache_i = rnn_step_forward(x_i, prev_h, Wx, Wh, b)
+        prev_h = h_i
+        temp_h.append(h_i)
+        temp_cache.append(cache_i)
+    
+    for i_val in range(x.shape[0]):
+        h.append([k[i_val] for k in temp_h])
+        cache.append([k[i_val] for k in temp_cache])
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################
@@ -141,7 +168,7 @@ def word_embedding_forward(x, W):
 
     Inputs:
     - x: Integer array of shape (N, T) giving indices of words. Each element idx
-      of x muxt be in the range 0 <= idx < V.
+      of x must be in the range 0 <= idx < V.
     - W: Weight matrix of shape (V, D) giving word vectors for all words.
 
     Returns a tuple of:
@@ -154,7 +181,13 @@ def word_embedding_forward(x, W):
     #                                                                            #
     # HINT: This can be done in one line using NumPy's array indexing.           #
     ##############################################################################
-    pass
+    out = list()
+    cache = list()
+    for i_batch in range(x.shape[0]):
+        out.append([W[word_ind] for word_ind in x[i_batch]])
+    
+
+    
     ##############################################################################
     #                               END OF YOUR CODE                             #
     ##############################################################################

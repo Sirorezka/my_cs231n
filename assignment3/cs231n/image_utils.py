@@ -3,6 +3,7 @@ from future import standard_library
 standard_library.install_aliases()
 from builtins import range
 import urllib.request, urllib.error, urllib.parse, os, tempfile
+import imageio
 
 import numpy as np
 from scipy.misc import imread, imresize
@@ -60,11 +61,17 @@ def image_from_url(url):
     """
     try:
         f = urllib.request.urlopen(url)
+        """
         _, fname = tempfile.mkstemp()
         with open(fname, 'wb') as ff:
             ff.write(f.read())
+            
         img = imread(fname)
-        os.remove(fname)
+        
+        os.remove(fname) """
+        
+        img = imageio.imread(f.read())
+        
         return img
     except urllib.error.URLError as e:
         print('URL Error: ', e.reason, url)
