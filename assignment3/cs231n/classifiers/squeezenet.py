@@ -2,6 +2,9 @@ import tensorflow as tf
 
 NUM_CLASSES = 1000
 
+## conv2d
+## [filter_height, filter_width, in_channels, out_channels]
+
 def fire_module(x,inp,sp,e11p,e33p):
     with tf.variable_scope("fire"):
         with tf.variable_scope("squeeze"):
@@ -19,7 +22,7 @@ def fire_module(x,inp,sp,e11p,e33p):
             b = tf.get_variable("bias",shape=[e33p])
             e33 = tf.nn.conv2d(s,W,[1,1,1,1],"SAME")+b
             e33 = tf.nn.relu(e33)
-        return tf.concat([e11,e33],3)
+        return tf.concat([e11,e33],3)  ## concatenate along channels
 
 
 class SqueezeNet(object):
