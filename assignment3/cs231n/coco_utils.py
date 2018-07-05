@@ -64,7 +64,7 @@ def decode_captions(captions, idx_to_word):
     for i in range(N):
         words = []
         for t in range(T):
-            word = idx_to_word[captions[i, t]]
+            word = idx_to_word[int(captions[i, t])]
             if word != '<NULL>':
                 words.append(word)
             if word == '<END>':

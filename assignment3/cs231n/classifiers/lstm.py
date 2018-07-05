@@ -144,7 +144,7 @@ class CaptioningRNN(object):
         ## forward
         h0 = features.dot(W_proj) + b_proj   ## (N,H)
         W_cap_in, cache_we = word_embedding_forward(captions_in, W_embed)  ##  (N,T,W)
-        h, cache_rnn = rnn_forward(W_cap_in,h0,Wx,Wh,b)   ## (N,T,H)
+        h, cache_rnn = lstm_forward(W_cap_in,h0,Wx,Wh,b)   ## (N,T,H)
         y_pred, cache_ta = temporal_affine_forward(h, W_vocab, b_vocab)
         loss, dy = temporal_softmax_loss(y_pred, captions_out, mask)
  
@@ -152,7 +152,7 @@ class CaptioningRNN(object):
 
         grads = dict()
         dh, grads['W_vocab'], grads['b_vocab'] = temporal_affine_backward(dy, cache_ta)
-        dW_cap_in, dh0, grads['Wx'], grads['Wh'], grads['b'] = rnn_backward(dh, cache_rnn)
+        dW_cap_in, dh0, grads['Wx'], grads['Wh'], grads['b'] = lstm_backward(dh, cache_rnn)
         grads['W_embed'] = word_embedding_backward(dW_cap_in,cache_we)
         
         grads['b_proj'] = np.sum(dh0,axis=0)
@@ -224,15 +224,18 @@ class CaptioningRNN(object):
         # you are using an LSTM, initialize the first cell state to zeros.        #
         ###########################################################################
         
+        H = W_vocab.shape[0]
+        
         curr_word = np.repeat(self._start,N)
         curr_h = features.dot(W_proj) + b_proj  ## h0
+        curr_c = np.zeros([N,H])
         captions = np.zeros([N,max_length])
         
         for i in range(max_length):
             curr_word = curr_word.reshape(N,1)
             x, _ = word_embedding_forward(curr_word,W_embed)
             x = x.reshape(x.shape[0],x.shape[2])
-            curr_h, _ = rnn_step_forward(x, curr_h, Wx, Wh, b)  
+            curr_h, curr_c, _ = lstm_step_forward(x, curr_h, curr_c, Wx, Wh, b)  
             curr_h = curr_h.reshape(curr_h.shape[0],1,curr_h.shape[1])
             y_pred, _ = temporal_affine_forward(curr_h, W_vocab, b_vocab)
             y_pred = curr_h.dot(W_vocab) + b_vocab
