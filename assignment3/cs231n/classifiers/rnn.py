@@ -1,5 +1,5 @@
 from builtins import range
-from builtins import object
+from builtinshttp://localhost:8888/edit/assignment3/cs231n/classifiers/rnn.py# import object
 import numpy as np
 
 from cs231n.layers import *
